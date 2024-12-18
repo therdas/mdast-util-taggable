@@ -1,5 +1,3 @@
-import { Literal } from "mdast";
-
 export interface Options {
   classes: Array<string>;
   rules: Array<Rules>;
@@ -31,11 +29,3 @@ export const defaultOptions: Options = {
   ],
   allowEmail: false,
 };
-
-export interface Taggable extends Literal {
-  type: "taggable";
-  ctx: string;
-  marker: string;
-  value: string;
-  url: string | undefined;
-}
