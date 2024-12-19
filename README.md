@@ -1,6 +1,6 @@
 # mdast-util-gfm-strikethrough
 
-[mdast][] extensions to parse and serialize generalized taggables like #tag and @user.
+`mdast` extensions to parse and serialize generalized taggables like #tag and @user.
 
 ## Contents
 
