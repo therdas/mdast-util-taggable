@@ -1,3 +1,10 @@
 src
 node_modules
 coverage
+.gitignore
+.npmignore
+eslint.config.js
+example.ts
+jest.config.ts
+rollup.config.js
+tsconfig.json
