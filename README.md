@@ -4,35 +4,35 @@
 
 ## Contents
 
-*   [What is this?](#what-is-this)
-*   [When to use this](#when-to-use-this)
-*   [Install](#install)
-*   [Use](#use)
-*   [API](#api)
-    *   [`gfmStrikethroughFromMarkdown()`](#gfmstrikethroughfrommarkdown)
-    *   [`gfmStrikethroughToMarkdown()`](#gfmstrikethroughtomarkdown)
-*   [HTML](#html)
-*   [Syntax](#syntax)
-*   [Syntax tree](#syntax-tree)
-    *   [Nodes](#nodes)
-    *   [Content model](#content-model)
-*   [Types](#types)
-*   [Compatibility](#compatibility)
-*   [Related](#related)
-*   [License](#license)
+- [What is this?](#what-is-this)
+- [When to use this](#when-to-use-this)
+- [Install](#install)
+- [Use](#use)
+- [API](#api)
+  - [`toMarkdown()`](#toMarkdown)
+  - [`fromMarkdown()`](#fromMarkdown)
+- [HTML](#html)
+- [Syntax](#syntax)
+- [Syntax tree](#syntax-tree)
+  - [Nodes](#nodes)
+- [Types](#types)
+- [Compatibility](#compatibility)
+- [Related](#related)
+- [License](#license)
 
 ## What is this?
 
-This package contains extensions that add support for custom mentions and tags into [`micromark`][micromark].
+This package contains extensions that add support for custom mentions and tags into `micromark`.
 It can be configured to parse tags of the following sort:
 
 ```md
 #tag @user $page #page/subpage
 ```
+
 These extensions plug into
-[`mdast-util-from-markdown`][mdast-util-from-markdown] (to support parsing
+`mdast-util-from-markdown` (to support parsing
 strikethrough in markdown into a syntax tree) and
-[`mdast-util-to-markdown`][mdast-util-to-markdown] (to support serializing
+`mdast-util-to-markdown` (to support serializing
 strikethrough in syntax trees to markdown).
 
 ## When to use this
@@ -44,7 +44,7 @@ When working with `mdast-util-from-markdown`, you must combine this package
 with [`micromark-extension-taggable`](https://github.com/therdas/micromark-extension-taggable).
 
 When you don’t need a syntax tree, you can use [`micromark`](https://github.com/micromark/micromark)
-directly with `micromark-extension-gfm-strikethrough`.
+directly with `micromark-extension-taggable`.
 
 All these packages are used [`remark-taggable`](https://github.com/therdas/remark-taggable), which
 focusses on making it easier to transform content by abstracting these
@@ -59,171 +59,181 @@ In Node.js (version 16+), install with [npm][]:
 ```sh
 npm install mdast-util-gfm-strikethrough
 ```
+
 ## Use
 
-Say our document `example.md` contains:
+Say our document string contains:
 
 ```markdown
-*Emphasis*, **importance**, and ~~strikethrough~~.
+_Emphasis_, **importance**, and ~~strikethrough~~.
 ```
 
-…and our module `example.js` looks as follows:
+…and our file `example.ts` looks as follows:
 
 ```js
-import fs from 'node:fs/promises'
-import {gfmStrikethrough} from 'micromark-extension-gfm-strikethrough'
-import {fromMarkdown} from 'mdast-util-from-markdown'
-import {gfmStrikethroughFromMarkdown, gfmStrikethroughToMarkdown} from 'mdast-util-gfm-strikethrough'
-import {toMarkdown} from 'mdast-util-to-markdown'
+import { fromMarkdown } from "mdast-util-from-markdown";
+import { syntax } from "micromark-extension-taggable";
+import { fromMarkdown as ft, toMarkdown as tt } from "mdast-util-taggable";
+import { toMarkdown } from "mdast-util-to-markdown";
 
-const doc = await fs.readFile('example.md')
+const doc =
+  "# We can now add tags and mentions!\nHi there @user! Hope you're enjoying your #visit.";
 
 const tree = fromMarkdown(doc, {
-  extensions: [gfmStrikethrough()],
-  mdastExtensions: [gfmStrikethroughFromMarkdown()]
-})
+  extensions: [syntax()],
+  mdastExtensions: [ft()],
+});
 
-console.log(tree)
+console.log(tree, tree.children[1]);
 
-const out = toMarkdown(tree, {extensions: [gfmStrikethroughToMarkdown()]})
+const out = toMarkdown(tree, { extensions: [tt()] });
 
-console.log(out)
+console.log(out);
 ```
 
-Now, running `node example` yields:
+Now, running `tsx example.ts` yields:
 
-```js
+```md
 {
-  type: 'root',
-  children: [
-    {
-      type: 'paragraph',
-      children: [
-        {type: 'emphasis', children: [{type: 'text', value: 'Emphasis'}]},
-        {type: 'text', value: ', '},
-        {type: 'strong', children: [{type: 'text', value: 'importance'}]},
-        {type: 'text', value: ', and '},
-        {type: 'delete', children: [{type: 'text', value: 'strikethrough'}]},
-        {type: 'text', value: '.'}
-      ]
-    }
-  ]
+type: 'root',
+children: [
+{
+type: 'heading',
+depth: 1,
+children: [Array],
+position: [Object]
+},
+{ type: 'paragraph', children: [Array], position: [Object] }
+],
+position: {
+start: { line: 1, column: 1, offset: 0 },
+end: { line: 2, column: 50, offset: 85 }
 }
-```
+} {
+type: 'paragraph',
+children: [
+{ type: 'text', value: 'Hi there ', position: [Object] },
+{
+type: 'taggable',
+value: 'user',
+data: [Object],
+position: [Object]
+},
+{
+type: 'text',
+value: "! Hope you're enjoying your ",
+position: [Object]
+},
+{
+type: 'taggable',
+value: 'visit',
+data: [Object],
+position: [Object]
+},
+{ type: 'text', value: '.', position: [Object] }
+],
+position: {
+start: { line: 2, column: 1, offset: 36 },
+end: { line: 2, column: 50, offset: 85 }
+}
+}
 
-```markdown
-*Emphasis*, **importance**, and ~~strikethrough~~.
+# We can now add tags and mentions!
+
+Hi there @user! Hope you're enjoying your #visit.
 ```
 
 ## API
 
 This package exports the identifiers
-[`gfmStrikethroughFromMarkdown`][api-gfm-strikethrough-from-markdown] and
-[`gfmStrikethroughToMarkdown`][api-gfm-strikethrough-to-markdown].
+`fromMarkdown` and
+`toMarkdown`.
 There is no default export.
 
-### `gfmStrikethroughFromMarkdown()`
+### `fromMarkdown()`
 
-Create an extension for [`mdast-util-from-markdown`][mdast-util-from-markdown]
-to enable GFM strikethrough in markdown.
-
-###### Returns
-
-Extension for `mdast-util-from-markdown` to enable GFM strikethrough
-([`FromMarkdownExtension`][from-markdown-extension]).
-
-### `gfmStrikethroughToMarkdown()`
-
-Create an extension for [`mdast-util-to-markdown`][mdast-util-to-markdown] to
-enable GFM strikethrough in markdown.
+Create an extension for `mdast-util-from-markdown`
+to enable parsing of taggables.
 
 ###### Returns
 
-Extension for `mdast-util-to-markdown` to enable GFM strikethrough
-([`ToMarkdownExtension`][to-markdown-extension]).
+Extension for `mdast-util-from-markdown`.
 
-## HTML
+### `toMarkdown()`
 
-This utility does not handle how markdown is turned to HTML.
-That’s done by [`mdast-util-to-hast`][mdast-util-to-hast].
-If you want a different element, you should configure that utility.
+Create an extension for `mdast-util-to-markdown`to
+enable parsing ASTs corresponding to taggables into markdown
+
+###### Returns
+
+Extension for `mdast-util-to-markdown`.
 
 ## Syntax
 
-See [Syntax in `micromark-extension-gfm-strikethrough`][syntax].
+See [Syntax in `micromark-extension-taggable`](https://github.com/therdas/micromark-extension-taggable)
 
 ## Syntax tree
 
-The following interfaces are added to **[mdast][]** by this utility.
+The following interfaces are added to **mdast** by this utility.
 
 ### Nodes
 
-#### `Delete`
+#### `InlineTaggable`
 
 ```idl
-interface Delete <: Parent {
-  type: 'delete'
-  children: [TransparentContent]
+interface InlineTaggable <: Inline {
+  type: 'taggable'
+  data: InlineTaggableData
+  value: string
+}
+
+interfaace InlineTaggableData <: Data {
+  marker: string
+  type: string
+  url: string
 }
 ```
 
-**Delete** (**[Parent][dfn-parent]**) represents contents that are no longer
-accurate or no longer relevant.
-
-**Delete** can be used where **[phrasing][dfn-phrasing-content]**
-content is expected.
-Its content model is **[transparent][dfn-transparent-content]** content.
+**1InlineTaggable** represents an inline taggable node. _All_ taggables are considered as being of this type - their presentation is modified according to **`InlineTaggableData`** values
 
 For example, the following markdown:
 
 ```markdown
-~~alpha~~
+#hey
 ```
 
 Yields:
 
 ```js
 {
-  type: 'delete',
-  children: [{type: 'text', value: 'alpha'}]
+  type: 'taggable',
+  value: 'hey',
+  data: { type: 'tag', marker: '#', url: '/tags/hey/' },
 }
 ```
 
+With the default configuration options.
+
 ### Content model
-
-#### `PhrasingContent` (GFM strikethrough)
-
-```idl
-type PhrasingContentGfm = Delete | PhrasingContent
-```
 
 ## Types
 
-This package is fully typed with [TypeScript][].
+This package is fully typed with [TypeScript][https://www.typescriptlang.org/].
 It does not export additional types.
 
-The `Delete` type of the mdast node is exposed from `@types/mdast`.
+The `InlineTaggableNode` and `InlineTaggableData` types of mdast node are extended for `@types/mdast`.
 
 ## Compatibility
 
-Projects maintained by the unified collective are compatible with maintained
-versions of Node.js.
-
-When we cut a new major release, we drop support for unmaintained versions of
-Node.
-This means we try to keep the current release line,
-`mdast-util-gfm-strikethrough@^2`, compatible with Node.js 16.
-
-This utility works with `mdast-util-from-markdown` version 2+ and
-`mdast-util-to-markdown` version 2+.
+Compatibility can vary from release to release, but in general it should be assumed that this package only works with the latest versions of `remark`, `micromark` and related packages.
 
 ## Related
 
-*   [`remark-taggable`](https://github.com/therdas/remark-taggable)
-    — remark plugin to support GFM
-*   [`micromark-extension-taggable`](https://github.com/therdas/micromark-extension-taggable)
-    — micromark extension to parse GFM strikethrough
+- [`remark-taggable`](https://github.com/therdas/remark-taggable)
+  — remark plugin to support GFM
+- [`micromark-extension-taggable`](https://github.com/therdas/micromark-extension-taggable)
+  — micromark extension to parse GFM strikethrough
 
 ## License
 
-[MIT][license] © [Rahul Das](https://www.github.com/therdas)
+MIT © [Rahul Das](https://www.github.com/therdas)

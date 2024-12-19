@@ -8,11 +8,6 @@ import { defaultOptions } from "./index";
 import { fromMarkdown } from "mdast-util-from-markdown";
 import { Root } from "mdast";
 
-// import {gfmStrikethroughFromMarkdown, gfmStrikethroughToMarkdown} from 'mdast-util-taggable'
-import { fromMarkdown as ft, toMarkdown as tt } from 'mdast-util-taggable'
-import { toMarkdown } from 'mdast-util-to-markdown'
-
-
 function checkIfContainsNode(node: InlineTaggableNode, root: Root) {
   let contains: boolean = false;
   visit(root, "taggable", (compare: InlineTaggableNode) => {

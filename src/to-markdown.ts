@@ -1,6 +1,12 @@
 import { InlineTaggableNode } from "./from-markdown";
 import { defaultOptions, Options } from "./types";
-import { Handle, Handlers, State, Unsafe, Options as Opts, ConstructName } from "mdast-util-to-markdown";
+import {
+  Handle,
+  Handlers,
+  State,
+  Unsafe,
+  ConstructName,
+} from "mdast-util-to-markdown";
 import * as unist from "unist";
 
 declare module "mdast-util-to-markdown" {
@@ -13,15 +19,15 @@ declare module "mdast-util-to-markdown" {
 export { Options, defaultOptions };
 
 export function toMarkdown(opts: Options = defaultOptions): {
-  handlers: Partial<Handlers>,
-  unsafe: Unsafe[]
+  handlers: Partial<Handlers>;
+  unsafe: Unsafe[];
 } {
   if (!opts.allowEmail) opts.allowEmail = false;
 
   const unsafe: Unsafe[] = opts.rules.flatMap((val) => {
     return {
       character: val.marker,
-      inConstruct: [ 'taggable' as ConstructName ],
+      inConstruct: ["taggable" as ConstructName],
     };
   });
 
