@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.0
+
+#### Changes
+
+- Bumped `micromark-extension-taggable` to `v1.1.0` to enable more robust unicode support.
+
 ## 1.2.1
 
 #### Changes
